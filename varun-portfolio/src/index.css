@@ -1,0 +1,97 @@
+@import "@fontsource/space-grotesk/400.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/instrument-serif/400-italic.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #0A0908;
+  --color-bg-soft: #121110;
+  --color-surface: #17150F;
+  --color-surface-2: #1E1B15;
+  --color-border: #2A2620;
+  --color-border-soft: #201D18;
+
+  --color-orange: #FF7A33;
+  --color-orange-dim: #FF7A3326;
+  --color-orange-soft: #FF7A331A;
+
+  --color-ink: #F3EFE8;
+  --color-ink-soft: #B8B2A6;
+  --color-ink-muted: #756E62;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-accent: "Instrument Serif", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --breakpoint-xs: 420px;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  html, body {
+    background: var(--color-bg);
+    color: var(--color-ink);
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-orange);
+    color: #0A0908;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-orange);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .text-accent-italic {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .grain-bg {
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.035) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

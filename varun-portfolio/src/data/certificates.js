@@ -1,0 +1,96 @@
+export const certificates = [
+  {
+    id: "tcs-ion",
+    title: "TCS iON Career Edge - Young Professional",
+    issuer: "Tata Consultancy Services (TCS iON)",
+    date: "Feb - Mar 2025",
+    badge: "Professional Certification",
+    category: "Professional & IT",
+    image: "/certificates/tcs-ion-career-edge.jpg",
+    pdf: "/certificates/tcs-ion-career-edge.pdf",
+    certId: "240640-27946663-1016",
+    skills: [
+      "Communication",
+      "Soft Skills",
+      "Business Etiquette",
+      "IT Fundamentals",
+      "AI Overview",
+    ],
+    description:
+      "Comprehensive professional course by TCS covering effective workplace communication, IT foundational skills, business etiquette, and artificial intelligence fundamentals.",
+  },
+  {
+    id: "devspark-agentic-ai",
+    title: "DEVSPARK'25 - 24hr Hackathon & Agentic AI Boot Camp",
+    issuer: "IEEE CS SYP & KPRIET",
+    date: "Sep 2025",
+    badge: "Hackathon & Boot Camp",
+    category: "AI & Hackathon",
+    image: "/certificates/devspark-agentic-ai.jpg",
+    skills: [
+      "Agentic AI",
+      "Hackathon",
+      "Problem Solving",
+      "Case Writing",
+    ],
+    description:
+      "Active participation in 24 hrs Hackathon, Agentic AI Boot Camp and Case Writing Contest organized by IEEE CS SYP High Impact Zonal Events at KPRIET.",
+  },
+  {
+    id: "digifest-2k26",
+    title: "DigiFest 2K26 - Idea Wins",
+    issuer: "Dr. Mahalingam College of Engineering & Technology",
+    date: "Mar 2026",
+    badge: "Intra-College Symposium",
+    category: "Innovation & Pitching",
+    image: "/certificates/digifest-idea-wins.jpg",
+    skills: ["Idea Presentation", "Innovation", "Technical Pitching"],
+    description:
+      "Participated in 'Idea Wins' technical symposium event organized by DIGIFLASH - CSE Department Association at MCET.",
+  },
+  {
+    id: "hp-life",
+    title: "Data Science & Analytics",
+    issuer: "HP LIFE Foundation",
+    date: "Jul 2025",
+    badge: "Skill Certification",
+    category: "Data Science",
+    image: "/certificates/hp-life-data-science.jpg",
+    certId: "81f7e0f0-a6cb-4acf-9514-283e982c9316",
+    skills: [
+      "Data Science",
+      "Analytics Methodology",
+      "Data-Driven Strategy",
+    ],
+    description:
+      "Learned leading data science and analytics practices, methodologies, tools, and examining benefits and challenges of data-driven business approaches.",
+  },
+  {
+    id: "guvi-hcl",
+    title: "A Guide to a Career in Data Science",
+    issuer: "GUVI & HCL",
+    date: "Apr 2025",
+    badge: "Webinar & Workshop",
+    category: "Data Science",
+    image: "/certificates/guvi-data-science.jpg",
+    skills: ["Data Science Tools", "Career Fundamentals", "Data Analytics"],
+    description:
+      "Participated in GUVI & HCL webinar covering Data Science tools, essential skills, and career fundamentals.",
+  },
+  {
+    id: "mcet-reverse-eng",
+    title: "Reverse Engineering - TECHNOFETE'25",
+    issuer: "Dr. Mahalingam College of Engineering & Technology",
+    date: "Mar 2025",
+    badge: "Technical Achievement",
+    category: "Engineering",
+    image: "/certificates/mcet-reverse-engineering.jpg",
+    skills: [
+      "Reverse Engineering",
+      "System Analysis",
+      "Technical Troubleshooting",
+    ],
+    description:
+      "Actively participated in Reverse Engineering competition at TECHNOFETE'25, an intra-college technical symposium by Student Research Council at MCET.",
+  },
+];

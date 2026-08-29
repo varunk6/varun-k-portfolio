@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A0908" />
+    <title>Varun K | Full Stack Developer</title>
+    <meta name="description" content="Portfolio of Varun K, a B.Tech Information Technology student and aspiring full stack developer building modern web applications, mobile apps and practical software solutions." />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Varun K | Full Stack Developer" />
+    <meta property="og:description" content="Portfolio of Varun K, a B.Tech Information Technology student and aspiring full stack developer building modern web applications, mobile apps and practical software solutions." />
+    <meta property="og:image" content="/profile.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('portfolio-theme');
+          var theme = 'dark';
+          if (saved === 'light' || saved === 'dark') {
+            theme = saved;
+          } else if (saved === 'system') {
+            theme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          }
+          document.documentElement.setAttribute('data-theme', theme);
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', theme === 'light' ? '#F7F5F2' : '#0A0908');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
