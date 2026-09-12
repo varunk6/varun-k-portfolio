@@ -2,8 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowDown, FileText } from "lucide-react";
 
-const badges = ["React", "Node.js", "Python", "Android", "MySQL"];
-
 const container = {
   hidden: {},
   show: {

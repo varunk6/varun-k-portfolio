@@ -59,8 +59,8 @@ export default function ProjectModal({ project, onClose }) {
               <X size={18} />
             </button>
 
-            <div className="aspect-[16/9]">
-              <ProjectMockup type={project.mockup} />
+            <div className="aspect-[16/9] w-full overflow-hidden rounded-t-3xl">
+              <ProjectMockup type={project.mockup} image={project.image} title={project.title} />
             </div>
 
             <div className="p-6 sm:p-8">

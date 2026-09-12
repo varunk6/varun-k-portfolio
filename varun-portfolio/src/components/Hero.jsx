@@ -2,8 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ArrowDown, FileText } from "lucide-react";
 
-const badges = ["React", "Node.js", "Python", "Android", "MySQL"];
-
 const container = {
   hidden: {},
   show: {
@@ -44,13 +42,13 @@ export default function Hero() {
         <motion.div variants={container} initial="hidden" animate="show">
           <motion.div
             variants={item}
-            className="inline-flex items-center gap-2 mb-4 font-mono text-[11px] sm:text-xs tracking-[0.2em] uppercase text-ink-soft bg-surface-2/80 px-3 py-1.5 rounded-full border border-border-soft"
+            className="inline-flex items-center gap-2 mb-4 font-mono text-[11px] sm:text-xs tracking-[0.15em] uppercase text-ink-soft bg-surface-2/80 px-3 py-1.5 rounded-full border border-border-soft"
           >
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-60" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-orange" />
             </span>
-            Currently building real-world software
+            Available to build projects
           </motion.div>
 
           <motion.p variants={item} className="text-ink-soft text-sm sm:text-base font-mono uppercase tracking-widest mb-1">
@@ -119,15 +117,39 @@ export default function Hero() {
             </a>
           </motion.div>
 
-          <motion.div variants={item} className="flex flex-wrap gap-1.5 sm:gap-2">
-            {badges.map((b) => (
-              <span
-                key={b}
-                className="text-[11px] sm:text-xs font-mono tracking-wide text-ink-muted border border-border-soft rounded-full px-2.5 sm:px-3 py-1"
-              >
-                {b}
-              </span>
-            ))}
+          <motion.div variants={item} className="flex flex-wrap gap-2 text-xs font-mono text-ink-muted mb-8">
+            <span className="text-ink-soft font-medium">React</span>
+            <span>•</span>
+            <span className="text-ink-soft font-medium">Node.js</span>
+            <span>•</span>
+            <span className="text-ink-soft font-medium">Python</span>
+            <span>•</span>
+            <span className="text-ink-soft font-medium">MySQL</span>
+            <span>•</span>
+            <span className="text-ink-soft font-medium">Android</span>
+          </motion.div>
+
+          {/* Hero Quick Stats Row */}
+          <motion.div
+            variants={item}
+            className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-border-soft/80 max-w-xl"
+          >
+            <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
+              <p className="font-display font-bold text-2xl text-orange">10+</p>
+              <p className="font-mono text-[10px] tracking-wider uppercase text-ink-muted">Projects</p>
+            </div>
+            <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
+              <p className="font-display font-bold text-2xl text-orange">6</p>
+              <p className="font-mono text-[10px] tracking-wider uppercase text-ink-muted">Certifications</p>
+            </div>
+            <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
+              <p className="font-display font-bold text-sm text-ink leading-tight">Full Stack</p>
+              <p className="font-mono text-[10px] tracking-wider uppercase text-orange">Development</p>
+            </div>
+            <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
+              <p className="font-display font-bold text-sm text-ink leading-tight">Android</p>
+              <p className="font-mono text-[10px] tracking-wider uppercase text-orange">Development</p>
+            </div>
           </motion.div>
         </motion.div>
 

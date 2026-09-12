@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 // Original, abstract preview art for each project type. Built with plain
 // divs/CSS (no external images) so every project has a distinct, premium
 // preview even before real screenshots are added.
@@ -189,15 +191,44 @@ const mockups = {
   game: GameMockup,
 };
 
-export default function ProjectMockup({ type }) {
+export default function ProjectMockup({ type, image, title }) {
+  const [imgErr, setImgErr] = useState(false);
   const Mockup = mockups[type] || DashboardMockup;
+  const isPhone = type === "phone";
+
   return (
-    <div className="relative h-full w-full bg-gradient-to-b from-surface to-bg-soft overflow-hidden">
+    <div className="relative h-full w-full bg-surface-2/90 overflow-hidden group/mockup flex items-center justify-center">
       <div
         aria-hidden="true"
         className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-orange/10 blur-3xl"
       />
-      <Mockup />
+      {image && !imgErr ? (
+        isPhone ? (
+          <div className="h-full w-full flex items-center justify-center p-2.5 sm:p-3.5">
+            <div className="relative h-[95%] aspect-[9/18.5] rounded-[22px] border border-white/15 bg-black p-1.5 shadow-2xl overflow-hidden transition-transform duration-500 group-hover/mockup:scale-105">
+              <img
+                src={image}
+                alt={title || "Project preview"}
+                onError={() => setImgErr(true)}
+                className="w-full h-full object-contain rounded-[16px]"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="relative h-full w-full flex items-center justify-center p-2 sm:p-3 overflow-hidden">
+            <div className="relative w-full h-full rounded-xl border border-white/10 bg-black/40 overflow-hidden flex items-center justify-center shadow-xl">
+              <img
+                src={image}
+                alt={title || "Project preview"}
+                onError={() => setImgErr(true)}
+                className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover/mockup:scale-[1.02]"
+              />
+            </div>
+          </div>
+        )
+      ) : (
+        <Mockup />
+      )}
     </div>
   );
 }

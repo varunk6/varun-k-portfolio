@@ -36,6 +36,12 @@
 }
 
 @layer base {
+  @media (hover: hover) and (pointer: fine) {
+    body, a, button, input, textarea, select, [role="button"] {
+      cursor: none;
+    }
+  }
+
   * {
     -webkit-tap-highlight-color: transparent;
   }

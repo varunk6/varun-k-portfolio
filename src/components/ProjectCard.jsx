@@ -1,3 +1,4 @@
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Check } from "lucide-react";
 import { GithubMark } from "./BrandIcons";
@@ -16,11 +17,41 @@ export default function ProjectCard({
 }) {
   const num = project.num || String(index + 1).padStart(2, "0");
 
+  // 3D Tilt & Glare States
+  const [rotateX, setRotateX] = useState(0);
+  const [rotateY, setRotateY] = useState(0);
+  const [glarePos, setGlarePos] = useState({ x: 50, y: 50, opacity: 0 });
+  const cardRef = useRef(null);
+
+  const handleMouseMove = (e) => {
+    if (!isActive || isMobile || !cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left - rect.width / 2) / (rect.width / 2);
+    const y = (e.clientY - rect.top - rect.height / 2) / (rect.height / 2);
+
+    // Max 10 degrees 3D tilt
+    setRotateX(-y * 9);
+    setRotateY(x * 9);
+
+    const glareX = ((e.clientX - rect.left) / rect.width) * 100;
+    const glareY = ((e.clientY - rect.top) / rect.height) * 100;
+    setGlarePos({ x: glareX, y: glareY, opacity: 0.18 });
+  };
+
+  const handleMouseLeave = () => {
+    setRotateX(0);
+    setRotateY(0);
+    setGlarePos((prev) => ({ ...prev, opacity: 0 }));
+  };
+
   if (!isMobile) {
-    // Desktop Stacked Carousel Card
+    // Desktop Stacked Carousel Card with 3D Parallax Tilt
     return (
       <motion.article
+        ref={cardRef}
         layout
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
         onClick={() => {
           if (isPrev || isNext) {
             onClickPeek?.();
@@ -34,19 +65,41 @@ export default function ProjectCard({
           filter: isActive ? "blur(0px)" : "blur(1.5px)",
         }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className={`relative w-full max-w-4xl mx-auto rounded-3xl border transition-all duration-300 ${
+        style={{
+          perspective: "1200px",
+          transformStyle: "preserve-3d",
+        }}
+        className={`relative w-full max-w-4xl mx-auto rounded-3xl border transition-colors duration-300 ${
           isActive
             ? "border-border-soft bg-surface shadow-[var(--theme-shadow)] hover:border-orange/50"
             : "border-border-soft/60 bg-surface/80 cursor-pointer pointer-events-auto"
         }`}
       >
-        <div className="p-6 sm:p-8 md:p-10 grid md:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-10 items-center">
+        {/* 3D Animated Card Container */}
+        <div
+          style={{
+            transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+            transformStyle: "preserve-3d",
+            transition: rotateX === 0 ? "transform 0.5s ease-out" : "transform 0.1s ease-out",
+          }}
+          className="relative w-full h-full p-6 sm:p-8 md:p-10 grid md:grid-cols-[1.1fr_0.9fr] gap-8 md:gap-10 items-center rounded-3xl overflow-hidden"
+        >
+          {/* Dynamic 3D Glare Light Reflection Overlay */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 transition-opacity duration-300 z-40 rounded-3xl"
+            style={{
+              opacity: glarePos.opacity,
+              background: `radial-gradient(circle at ${glarePos.x}% ${glarePos.y}%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 65%)`,
+            }}
+          />
+
           {/* Left Column: Details & Scanning info */}
-          <div className="flex flex-col h-full justify-between">
+          <div className="flex flex-col h-full justify-between relative z-20">
             <div>
               {/* Header Badges */}
               <div className="flex items-center justify-between gap-3 mb-4">
-                <span className="font-mono text-xs font-bold tracking-widest text-orange bg-orange-soft border border-orange/20 px-3 py-1 rounded-full">
+                <span className="font-mono text-xs font-bold tracking-widest text-orange bg-orange-soft border border-orange/20 px-3 py-1 rounded-full shadow-xs">
                   PROJ. {num}
                 </span>
                 <span className="font-mono text-[11px] font-semibold tracking-wider uppercase text-ink-muted bg-surface-2 px-3 py-1 rounded-full border border-border-soft">
@@ -62,7 +115,7 @@ export default function ProjectCard({
                 {project.description}
               </p>
 
-              {/* Top 4-5 Feature Highlights with +N more badge for scanning */}
+              {/* Highlights */}
               <div className="mb-6">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-ink-muted mb-2.5">
                   Key Highlights
@@ -141,26 +194,29 @@ export default function ProjectCard({
             </div>
           </div>
 
-          {/* Right Column: Visual Mockup */}
+          {/* Right Column: Visual Mockup / Photo with 3D Depth Elevation */}
           <div
             data-cursor-hover
             onClick={(e) => {
               e.stopPropagation();
               onOpen(project);
             }}
-            className="group relative rounded-2xl border border-border-soft overflow-hidden aspect-[16/10] bg-surface-2 cursor-pointer shadow-lg hover:border-orange/50 transition-colors"
+            style={{
+              transform: rotateX !== 0 ? "translateZ(25px) scale(1.03)" : "translateZ(0px) scale(1)",
+              transition: "transform 0.3s ease-out",
+            }}
+            className="group relative rounded-2xl border border-border-soft overflow-hidden aspect-[16/10] bg-surface-2 cursor-pointer shadow-xl hover:border-orange/50 transition-colors z-30"
           >
-            <div className="absolute inset-0 transition-transform duration-500 group-hover:scale-[1.03]">
-              <ProjectMockup type={project.mockup} />
+            <div className="w-full h-full">
+              <ProjectMockup type={project.mockup} image={project.image} title={project.title} />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-t from-bg/40 via-transparent to-transparent opacity-60 group-hover:opacity-30 transition-opacity" />
           </div>
         </div>
       </motion.article>
     );
   }
 
-  // Mobile Vertical Card Layout (Compact, High Density)
+  // Mobile Vertical Card Layout (Compact)
   return (
     <article
       onClick={() => onOpen(project)}
@@ -178,7 +234,7 @@ export default function ProjectCard({
 
       {/* Visual area */}
       <div className="relative aspect-[16/10] rounded-xl overflow-hidden border border-border-soft bg-surface-2 mb-4">
-        <ProjectMockup type={project.mockup} />
+        <ProjectMockup type={project.mockup} image={project.image} title={project.title} />
       </div>
 
       <h3 className="font-display font-bold text-xl text-ink mb-1.5">
