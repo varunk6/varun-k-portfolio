@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Award, ExternalLink, X, Calendar, CheckCircle2, ShieldCheck, Sparkles } from "lucide-react";
+import { Award, ExternalLink, X, Calendar, ShieldCheck, Sparkles, FileText } from "lucide-react";
 import SectionHeading from "./SectionHeading";
 import { certificates } from "../data/certificates";
 
 const categories = ["All", "Professional & IT", "AI & Hackathon", "Data Science", "Innovation & Pitching"];
 
-export default function Certifications() {
+export default function Certifications({ onOpenPdf, onOpenImage }) {
   const [activeCategory, setActiveCategory] = useState("All");
   const [selectedCert, setSelectedCert] = useState(null);
 
@@ -14,12 +14,29 @@ export default function Certifications() {
     (c) => activeCategory === "All" || c.category === activeCategory
   );
 
+  const handleViewCert = (cert) => {
+    if (cert.pdf && onOpenPdf) {
+      onOpenPdf({
+        pdfUrl: cert.pdf,
+        title: cert.title,
+        downloadUrl: cert.pdf,
+      });
+    } else if (cert.image && onOpenImage) {
+      onOpenImage({
+        images: [cert.image],
+        title: cert.title,
+      });
+    } else {
+      setSelectedCert(cert);
+    }
+  };
+
   return (
     <section id="certifications" className="relative py-24 md:py-32">
       <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
         <SectionHeading
           number="05"
-          label="CREDENTIALS"
+          label="CERTIFICATIONS"
           title="Certifications"
           subtitle="Selected courses, events and technical credentials."
         />
@@ -55,16 +72,23 @@ export default function Certifications() {
             >
               {/* Image Thumbnail Container */}
               <div
-                onClick={() => setSelectedCert(cert)}
+                onClick={() => handleViewCert(cert)}
                 data-cursor-hover
                 className="relative aspect-[16/10] bg-surface-2 overflow-hidden cursor-pointer group/img"
               >
-                <img
-                  src={cert.image}
-                  alt={cert.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
-                  loading="lazy"
-                />
+                {cert.image ? (
+                  <img
+                    src={cert.image}
+                    alt={cert.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover/img:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-surface-2 text-ink-muted">
+                    <Award size={32} className="text-orange" />
+                    <span className="font-mono text-xs">Certificate Available</span>
+                  </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/20 to-transparent opacity-80 group-hover/img:opacity-60 transition-opacity" />
 
                 {/* Badge top-left */}
@@ -94,7 +118,7 @@ export default function Certifications() {
                 </div>
 
                 <h3
-                  onClick={() => setSelectedCert(cert)}
+                  onClick={() => handleViewCert(cert)}
                   data-cursor-hover
                   className="font-display font-bold text-lg text-ink hover:text-orange transition-colors cursor-pointer leading-snug mb-2"
                 >
@@ -162,11 +186,15 @@ export default function Certifications() {
 
               {/* Modal Image Display */}
               <div className="relative overflow-auto p-4 sm:p-6 flex items-center justify-center bg-black/40 min-h-[300px]">
-                <img
-                  src={selectedCert.image}
-                  alt={selectedCert.title}
-                  className="max-h-[60vh] w-auto max-w-full object-contain rounded-lg shadow-lg border border-border-soft"
-                />
+                {selectedCert.image ? (
+                  <img
+                    src={selectedCert.image}
+                    alt={selectedCert.title}
+                    className="max-h-[60vh] w-auto max-w-full object-contain rounded-lg shadow-lg border border-border-soft"
+                  />
+                ) : (
+                  <p className="text-ink-muted font-mono text-sm">Certificate file available</p>
+                )}
               </div>
 
               {/* Modal Footer Info */}
@@ -184,16 +212,22 @@ export default function Certifications() {
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   {selectedCert.pdf && (
-                    <a
-                      href={selectedCert.pdf}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const certPdf = selectedCert.pdf;
+                        const certTitle = selectedCert.title;
+                        setSelectedCert(null);
+                        if (onOpenPdf) {
+                          onOpenPdf({ pdfUrl: certPdf, title: certTitle, downloadUrl: certPdf });
+                        }
+                      }}
                       data-cursor-hover
                       className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-orange text-bg font-medium px-5 py-2.5 rounded-full hover:brightness-110 transition-all text-xs"
                     >
-                      <span>Open PDF Certificate</span>
-                      <ExternalLink size={14} />
-                    </a>
+                      <FileText size={14} />
+                      <span>View PDF Certificate</span>
+                    </button>
                   )}
                 </div>
               </div>

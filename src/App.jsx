@@ -11,6 +11,9 @@ import About from "./components/About";
 import WhatIBuild from "./components/WhatIBuild";
 import TechMarquee from "./components/TechMarquee";
 import Projects from "./components/Projects";
+import ProjectModal from "./components/ProjectModal";
+import PdfViewerModal from "./components/PdfViewerModal";
+import ImageLightboxModal from "./components/ImageLightboxModal";
 import Skills from "./components/Skills";
 import Journey from "./components/Journey";
 import Certifications from "./components/Certifications";
@@ -20,6 +23,9 @@ import BackToTop from "./components/BackToTop";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const [activeProject, setActiveProject] = useState(null);
+  const [pdfModalData, setPdfModalData] = useState(null);
+  const [imageLightboxData, setImageLightboxData] = useState(null);
 
   useEffect(() => {
     const reduceMotion = window.matchMedia(
@@ -80,20 +86,36 @@ export default function App() {
       <BottomNav />
 
       <main>
-        <Hero />
+        <Hero onOpenPdf={setPdfModalData} />
         <About />
         <WhatIBuild />
         <TechMarquee />
-        <Projects />
+        <Projects activeProject={activeProject} onOpen={setActiveProject} />
         <Skills />
         <Journey />
-        <Certifications />
+        <Certifications onOpenPdf={setPdfModalData} onOpenImage={setImageLightboxData} />
         <Contact />
       </main>
+
+      <ProjectModal project={activeProject} onClose={() => setActiveProject(null)} />
+
+      <PdfViewerModal
+        pdfUrl={pdfModalData?.pdfUrl}
+        title={pdfModalData?.title}
+        downloadUrl={pdfModalData?.downloadUrl}
+        onClose={() => setPdfModalData(null)}
+      />
+
+      <ImageLightboxModal
+        images={imageLightboxData?.images}
+        initialIndex={imageLightboxData?.initialIndex || 0}
+        title={imageLightboxData?.title}
+        isOpen={Boolean(imageLightboxData)}
+        onClose={() => setImageLightboxData(null)}
+      />
 
       <Footer />
       <BackToTop />
     </ThemeProvider>
   );
 }
-

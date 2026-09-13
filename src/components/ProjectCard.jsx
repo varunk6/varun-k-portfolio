@@ -102,9 +102,16 @@ export default function ProjectCard({
                 <span className="font-mono text-xs font-bold tracking-widest text-orange bg-orange-soft border border-orange/20 px-3 py-1 rounded-full shadow-xs">
                   PROJ. {num}
                 </span>
-                <span className="font-mono text-[11px] font-semibold tracking-wider uppercase text-ink-muted bg-surface-2 px-3 py-1 rounded-full border border-border-soft">
-                  {project.category}
-                </span>
+                <div className="flex items-center gap-2">
+                  {project.status && (
+                    <span className="font-mono text-[10px] tracking-wide text-ink-soft bg-surface-2 px-2.5 py-1 rounded-full border border-border-soft">
+                      {project.status}
+                    </span>
+                  )}
+                  <span className="font-mono text-[11px] font-semibold tracking-wider uppercase text-ink-muted bg-surface-2 px-3 py-1 rounded-full border border-border-soft">
+                    {project.category}
+                  </span>
+                </div>
               </div>
 
               {/* Title & Short Description */}
@@ -121,7 +128,7 @@ export default function ProjectCard({
                   Key Highlights
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {(project.highlights || project.features.slice(0, 4)).slice(0, 5).map((h) => (
+                  {(project.highlights || project.features.slice(0, 4)).slice(0, 4).map((h) => (
                     <span
                       key={h}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-soft bg-surface-2/90 border border-border-soft rounded-lg px-2.5 py-1"
@@ -130,7 +137,7 @@ export default function ProjectCard({
                       {h}
                     </span>
                   ))}
-                  {project.features && project.features.length > 5 && (
+                  {project.features && project.features.length > 4 && (
                     <button
                       type="button"
                       onClick={(e) => {
@@ -139,7 +146,7 @@ export default function ProjectCard({
                       }}
                       className="inline-flex items-center gap-1 text-xs font-mono font-medium text-orange bg-orange-soft border border-orange/30 rounded-lg px-2.5 py-1 hover:bg-orange/20 transition-colors"
                     >
-                      +{project.features.length - 5} more
+                      +{project.features.length - 4} more
                     </button>
                   )}
                 </div>
@@ -149,7 +156,7 @@ export default function ProjectCard({
             {/* Bottom Tech Tags & Action CTAs */}
             <div>
               <div className="flex flex-wrap gap-1.5 mb-6">
-                {project.technologies.slice(0, 5).map((t) => (
+                {project.technologies.slice(0, 4).map((t) => (
                   <span
                     key={t}
                     className="text-[11px] font-mono text-ink-muted border border-border-soft rounded-full px-3 py-1 bg-surface-2/40"
@@ -227,9 +234,16 @@ export default function ProjectCard({
         <span className="font-mono text-xs font-bold text-orange bg-orange-soft border border-orange/20 px-2.5 py-0.5 rounded-full">
           PROJ. {num}
         </span>
-        <span className="font-mono text-[10px] tracking-wider uppercase text-ink-muted">
-          {project.category}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {project.status && (
+            <span className="font-mono text-[10px] text-ink-soft bg-surface-2 px-2 py-0.5 rounded-full border border-border-soft">
+              {project.status}
+            </span>
+          )}
+          <span className="font-mono text-[10px] tracking-wider uppercase text-ink-muted">
+            {project.category}
+          </span>
+        </div>
       </div>
 
       {/* Visual area */}
@@ -258,7 +272,7 @@ export default function ProjectCard({
       </div>
 
       <div className="flex flex-wrap gap-1 mb-4">
-        {project.technologies.slice(0, 3).map((t) => (
+        {project.technologies.slice(0, 4).map((t) => (
           <span
             key={t}
             className="text-[10px] font-mono text-ink-muted border border-border-soft rounded-full px-2 py-0.5"

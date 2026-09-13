@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Mail, Send, CheckCircle2, Copy, Check } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Send, CheckCircle2, Copy, Check, ExternalLink } from "lucide-react";
 import { GithubMark, LinkedinMark, InstagramMark } from "./BrandIcons";
 import SectionHeading from "./SectionHeading";
 import { socialLinks } from "../data/navigation";
@@ -11,8 +11,15 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function Contact() {
   const [values, setValues] = useState(initialState);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState("idle"); // idle | success
-  const [copied, setCopied] = useState(false);
+  const [status, setStatus] = useState("idle"); // idle | loading | success
+  const [toastMessage, setToastMessage] = useState(null);
+
+  const showToast = (msg) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3000);
+  };
 
   const handleCopyEmail = async () => {
     const emailStr = "skvvarun6@gmail.com";
@@ -27,10 +34,9 @@ export default function Contact() {
         document.execCommand("copy");
         document.body.removeChild(textArea);
       }
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
+      showToast("Email copied!");
     } catch (err) {
-      console.error("Failed to copy email: ", err);
+      showToast("skvvarun6@gmail.com");
     }
   };
 
@@ -62,7 +68,6 @@ export default function Contact() {
     setStatus("loading");
 
     try {
-      // Formspree API submission attempt
       const response = await fetch("https://formspree.io/f/skvvarun6@gmail.com", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -73,7 +78,6 @@ export default function Contact() {
         setStatus("success");
         setValues(initialState);
       } else {
-        // Fallback to mailto pre-filled draft
         const subject = encodeURIComponent(`Portfolio message from ${values.name}`);
         const body = encodeURIComponent(
           `${values.message}\n\n— ${values.name} (${values.email})`
@@ -83,7 +87,6 @@ export default function Contact() {
         setValues(initialState);
       }
     } catch (err) {
-      // Fallback to mailto draft on network issue
       const subject = encodeURIComponent(`Portfolio message from ${values.name}`);
       const body = encodeURIComponent(
         `${values.message}\n\n— ${values.name} (${values.email})`
@@ -96,41 +99,75 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative py-24 md:py-32 pb-32 md:pb-32">
+      {/* Toast Notification Container */}
+      <div
+        aria-live="polite"
+        className="fixed bottom-6 right-6 z-[400] pointer-events-none"
+      >
+        <AnimatePresence>
+          {toastMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.9 }}
+              transition={{ duration: 0.25 }}
+              className="pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl bg-surface border border-orange/40 text-ink shadow-2xl text-xs font-mono"
+            >
+              <CheckCircle2 size={16} className="text-orange" />
+              <span>{toastMessage}</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 grid md:grid-cols-2 gap-14 md:gap-16">
         <div>
           <SectionHeading
-            number="07"
+            number="06"
             label="CONTACT"
-            title="Let's Connect"
-            subtitle="Have an idea or project in mind? Let's build something together."
+            title="Let's Work Together"
+            subtitle="Interested in my work or have an opportunity? Feel free to reach out."
           />
 
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <div className="text-sm font-mono text-ink-soft flex items-center gap-2 bg-surface px-4 py-2.5 rounded-xl border border-border-soft">
-              <Mail size={16} className="text-orange" />
-              <a href={socialLinks.email} className="hover:text-orange transition-colors">
-                skvvarun6@gmail.com
+          {/* Quick Contact CTA Action Buttons */}
+          <div className="mt-8 space-y-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <a
+                href={socialLinks.email}
+                data-cursor-hover
+                className="inline-flex items-center gap-2 bg-orange text-bg font-medium px-5 py-2.5 rounded-full hover:brightness-110 transition-all text-xs sm:text-sm shadow-md"
+              >
+                <Mail size={16} />
+                <span>Email Me</span>
               </a>
+
+              <a
+                href={socialLinks.linkedin}
+                target="_blank"
+                rel="noreferrer"
+                data-cursor-hover
+                className="inline-flex items-center gap-2 border border-border-soft bg-surface text-ink font-medium px-5 py-2.5 rounded-full hover:border-orange/50 hover:text-orange transition-colors text-xs sm:text-sm"
+              >
+                <LinkedinMark size={16} />
+                <span>LinkedIn</span>
+                <ExternalLink size={13} className="opacity-60" />
+              </a>
+
+              <button
+                type="button"
+                onClick={handleCopyEmail}
+                data-cursor-hover
+                aria-label="Copy email address skvvarun6@gmail.com"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-mono text-ink-soft bg-surface border border-border-soft hover:border-orange/40 hover:text-orange transition-all"
+              >
+                <Copy size={14} />
+                <span>Copy Email</span>
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handleCopyEmail}
-              data-cursor-hover
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-mono text-ink-soft bg-surface border border-border-soft hover:border-orange/40 hover:text-orange transition-all"
-              aria-label="Copy email address"
-            >
-              {copied ? (
-                <>
-                  <Check size={14} className="text-orange" />
-                  <span className="text-orange font-semibold">Email copied ✓</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={14} />
-                  <span>Copy Email</span>
-                </>
-              )}
-            </button>
+
+            <div className="text-xs font-mono text-ink-muted pt-1">
+              Direct email: <span className="text-ink font-medium select-all">skvvarun6@gmail.com</span>
+            </div>
           </div>
 
           <div className="mt-8 flex items-center gap-4">
@@ -241,7 +278,7 @@ export default function Contact() {
               aria-invalid={Boolean(errors.message)}
               aria-describedby={errors.message ? "message-error" : undefined}
               className="w-full bg-surface border border-border-soft rounded-xl px-4 py-3 text-ink placeholder:text-ink-muted focus:border-orange focus:outline-none transition-colors resize-none"
-              placeholder="Tell me about your project..."
+              placeholder="Tell me about your project or opportunity..."
             />
             {errors.message && (
               <p id="message-error" className="text-xs text-orange mt-1.5">

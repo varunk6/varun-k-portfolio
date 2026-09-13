@@ -17,7 +17,7 @@ export const mobileNavLinks = [
 ];
 
 export const socialLinks = {
-  github: "https://github.com/varun6-Tech",
+  github: "https://github.com/varunk6",
   linkedin: "https://www.linkedin.com/in/varun-k-20061307v?utm_source=share_via&utm_content=profile&utm_medium=member_android",
   instagram: "https://www.instagram.com/skv_varun?igsh=dGZzcGFoazg1NWZ2",
   email: "mailto:skvvarun6@gmail.com",

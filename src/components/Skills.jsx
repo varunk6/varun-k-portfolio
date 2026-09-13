@@ -60,16 +60,10 @@ const categoryIconMap = {
   Other: Layers,
 };
 
-const levelBadgeStyle = {
-  strong: "text-orange bg-orange-soft border-orange/30 font-semibold",
-  working: "text-ink-soft bg-surface-2 border-border-soft font-medium",
-  familiar: "text-ink-muted bg-surface-2/60 border-border-soft/60 font-normal",
-};
-
-const levelTextMap = {
-  strong: "Strong",
-  working: "Working Knowledge",
-  familiar: "Familiar",
+const progressMap = {
+  strong: { width: "100%", percentage: "100%" },
+  working: { width: "60%", percentage: "60%" },
+  familiar: { width: "40%", percentage: "40%" },
 };
 
 export default function Skills() {
@@ -78,7 +72,7 @@ export default function Skills() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         <SectionHeading
           number="03"
-          label="EXPERTISE"
+          label="TECH STACK"
           title="Core"
           accent="Skills"
           align="center"
@@ -115,30 +109,36 @@ export default function Skills() {
                   </div>
 
                   {/* Skills Items List */}
-                  <div className="space-y-2.5">
-                    {group.skills.map((skill, sIdx) => {
+                  <div className="space-y-3">
+                    {group.skills.map((skill) => {
                       const Icon = iconMap[skill.icon] || Code2;
+                      const progress = progressMap[skill.level] || progressMap.working;
                       return (
                         <div
                           key={skill.name}
                           className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-surface-2/50 border border-border-soft/60 hover:border-orange/30 hover:bg-surface-2 transition-all"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-border-soft text-ink-soft group-hover/item:text-orange">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-surface flex items-center justify-center border border-border-soft text-ink-soft shrink-0">
                               <Icon size={16} />
                             </div>
-                            <span className="font-display font-medium text-sm text-ink">
+                            <span className="font-display font-medium text-sm text-ink truncate">
                               {skill.name}
                             </span>
                           </div>
 
-                          <span
-                            className={`text-[10px] font-mono tracking-wide px-2.5 py-1 rounded-md border ${
-                              levelBadgeStyle[skill.level] || levelBadgeStyle.working
-                            }`}
-                          >
-                            {levelTextMap[skill.level] || "Working"}
-                          </span>
+                          {/* Visual Progress Bar Line (Full learning = 100%, Half = 60%) */}
+                          <div className="w-24 sm:w-28 flex items-center gap-2 shrink-0">
+                            <div className="flex-1 h-2 rounded-full bg-bg/80 border border-border-soft overflow-hidden p-0.5">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                whileInView={{ width: progress.width }}
+                                viewport={{ once: true }}
+                                transition={{ duration: 0.8, ease: "easeOut" }}
+                                className="h-full rounded-full bg-orange shadow-[0_0_8px_rgba(255,122,51,0.6)]"
+                              />
+                            </div>
+                          </div>
                         </div>
                       );
                     })}

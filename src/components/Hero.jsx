@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ArrowDown, FileText } from "lucide-react";
+import { ArrowRight, ArrowDown, FileText, Briefcase } from "lucide-react";
 
 const container = {
   hidden: {},
@@ -14,7 +14,7 @@ const item = {
   show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-export default function Hero() {
+export default function Hero({ onOpenPdf }) {
   const [imgError, setImgError] = useState(false);
 
   const scrollTo = (href) => (e) => {
@@ -40,16 +40,30 @@ export default function Hero() {
 
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-8 lg:px-12 grid md:grid-cols-[1.15fr_0.85fr] gap-8 lg:gap-12 items-center">
         <motion.div variants={container} initial="hidden" animate="show">
-          <motion.div
-            variants={item}
-            className="inline-flex items-center gap-2 mb-4 font-mono text-[11px] sm:text-xs tracking-[0.15em] uppercase text-ink-soft bg-surface-2/80 px-3 py-1.5 rounded-full border border-border-soft"
-          >
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-60" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-orange" />
-            </span>
-            Available to build projects
-          </motion.div>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <motion.div
+              variants={item}
+              className="inline-flex items-center gap-2 font-mono text-[11px] sm:text-xs tracking-[0.15em] uppercase text-ink-soft bg-surface-2/80 px-3 py-1.5 rounded-full border border-border-soft"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange opacity-60" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange" />
+              </span>
+              Available to build projects
+            </motion.div>
+
+            {/* Recruiter Micro-CTA */}
+            <motion.a
+              variants={item}
+              href="#contact"
+              onClick={scrollTo("#contact")}
+              data-cursor-hover
+              className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-wider text-orange bg-orange-soft px-3 py-1.5 rounded-full border border-orange/30 hover:bg-orange/20 transition-colors"
+            >
+              <Briefcase size={12} />
+              <span>Open to Opportunities</span>
+            </motion.a>
+          </div>
 
           <motion.p variants={item} className="text-ink-soft text-sm sm:text-base font-mono uppercase tracking-widest mb-1">
             Hello, I'm
@@ -105,16 +119,22 @@ export default function Hero() {
             >
               Contact Me
             </a>
-            <a
-              href="/Varun-K-Resume.pdf"
-              target="_blank"
-              rel="noreferrer"
+            <button
+              type="button"
+              onClick={() =>
+                onOpenPdf &&
+                onOpenPdf({
+                  pdfUrl: "/Varun-K-Resume.pdf",
+                  title: "Varun K — Resume",
+                  downloadUrl: "/Varun-K-Resume.pdf",
+                })
+              }
               data-cursor-hover
-              className="inline-flex items-center justify-center gap-2 border border-border-soft bg-surface text-ink-soft hover:text-ink font-medium px-5 py-3.5 rounded-full hover:border-orange/40 transition-colors text-sm"
+              className="inline-flex items-center justify-center gap-2 border border-border-soft bg-surface text-ink-soft hover:text-orange font-medium px-5 py-3.5 rounded-full hover:border-orange/40 transition-colors text-sm"
             >
               <FileText size={16} className="text-orange" />
-              Resume
-            </a>
+              View Resume
+            </button>
           </motion.div>
 
           <motion.div variants={item} className="flex flex-wrap gap-2 text-xs font-mono text-ink-muted mb-8">
@@ -135,7 +155,7 @@ export default function Hero() {
             className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-border-soft/80 max-w-xl"
           >
             <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
-              <p className="font-display font-bold text-2xl text-orange">10+</p>
+              <p className="font-display font-bold text-2xl text-orange">10</p>
               <p className="font-mono text-[10px] tracking-wider uppercase text-ink-muted">Projects</p>
             </div>
             <div className="bg-surface/80 border border-border-soft rounded-2xl p-3 text-center sm:text-left">
