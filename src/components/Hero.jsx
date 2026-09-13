@@ -188,7 +188,7 @@ export default function Hero({ onOpenPdf }) {
             {!imgError ? (
               <img
                 src="/profile.jpg"
-                alt="Portrait of Varun K"
+                alt="Varun K — Full Stack Developer"
                 onError={() => setImgError(true)}
                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
               />
