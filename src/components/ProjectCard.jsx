@@ -183,6 +183,21 @@ export default function ProjectCard({
                   />
                 </button>
 
+                {project.live && project.live !== "#" && (
+                  <a
+                    href={project.live}
+                    target="_blank"
+                    rel="noreferrer"
+                    data-cursor-hover
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`${project.title} live demo`}
+                    className="inline-flex items-center gap-1.5 text-xs font-mono text-ink-muted hover:text-orange border border-border-soft hover:border-orange/40 rounded-full px-4 py-2.5 transition-colors"
+                  >
+                    <span>Live Demo</span>
+                    <ArrowUpRight size={14} />
+                  </a>
+                )}
+
                 {project.github && project.github !== "#" && (
                   <a
                     href={project.github}
