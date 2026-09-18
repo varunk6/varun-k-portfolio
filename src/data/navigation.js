@@ -15,10 +15,29 @@ export const mobileNavLinks = [
   { label: "Contact", href: "#contact", icon: "MessageSquare" },
 ];
 
+// ==========================================
+// WHATSAPP CONFIGURATION
+// ==========================================
+// Replace "YOUR_NUMBER_HERE" with your verified WhatsApp phone number.
+// Example format for Indian numbers: "919876543210" (country code 91 + 10-digit number without +, spaces, or hyphens).
+// If left as "YOUR_NUMBER_HERE" or empty (""), the WhatsApp widget remains completely hidden from visitors.
+export const WHATSAPP_NUMBER = "YOUR_NUMBER_HERE";
+
+export const footerNavLinks = [
+  { label: "Home", href: "#home" },
+  { label: "About", href: "#about" },
+  { label: "What I Build", href: "#what-i-build" },
+  { label: "Projects", href: "#projects" },
+  { label: "Skills", href: "#skills" },
+  { label: "Journey", href: "#journey" },
+  { label: "Certifications", href: "#certifications" },
+  { label: "Contact", href: "#contact" },
+];
+
 export const socialLinks = {
   github: "https://github.com/varunk6",
-  linkedin: "https://www.linkedin.com/in/varun-k-20061307v?utm_source=share_via&utm_content=profile&utm_medium=member_android",
-  instagram: "https://www.instagram.com/skv_varun?igsh=dGZzcGFoazg1NWZ2",
+  linkedin: "https://www.linkedin.com/in/varun-k-20061307v",
+  instagram: "https://www.instagram.com/skv_varun",
   email: "mailto:skvvarun6@gmail.com",
 };
 

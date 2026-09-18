@@ -27,7 +27,7 @@ export default function BackToTop() {
           onClick={scrollToTop}
           data-cursor-hover
           aria-label="Scroll back to top"
-          className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center justify-center w-10 h-10 rounded-full bg-surface border border-border-soft text-ink-soft hover:text-orange hover:border-orange/50 hover:shadow-[0_0_20px_rgba(255,122,51,0.3)] transition-all"
+          className="fixed bottom-34 md:bottom-22 right-4 sm:right-6 z-40 flex items-center justify-center w-10 h-10 rounded-full bg-surface border border-border-soft text-ink-soft hover:text-orange hover:border-orange/50 hover:shadow-[0_0_20px_rgba(255,122,51,0.3)] transition-all shadow-md backdrop-blur-md"
         >
           <ArrowUp size={18} />
         </motion.button>

@@ -20,6 +20,7 @@ import Certifications from "./components/Certifications";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import BackToTop from "./components/BackToTop";
+import WhatsAppButton from "./components/WhatsAppButton";
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -90,7 +91,11 @@ export default function App() {
         <About />
         <WhatIBuild />
         <TechMarquee />
-        <Projects activeProject={activeProject} onOpen={setActiveProject} />
+        <Projects
+          activeProject={activeProject}
+          onOpen={setActiveProject}
+          onOpenLightbox={setImageLightboxData}
+        />
         <Skills />
         <Journey />
         <Certifications onOpenPdf={setPdfModalData} onOpenImage={setImageLightboxData} />
@@ -115,6 +120,7 @@ export default function App() {
       />
 
       <Footer />
+      <WhatsAppButton />
       <BackToTop />
     </ThemeProvider>
   );
