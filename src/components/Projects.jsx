@@ -1,38 +1,10 @@
 import { useMemo, useState, useEffect, useCallback, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, Search, X } from "lucide-react";
 import SectionHeading from "./SectionHeading";
 import ProjectCard from "./ProjectCard";
 import ProjectModal from "./ProjectModal";
 import projects, { filterCategories } from "../data/projects";
-
-const slideVariants = {
-  enter: (direction) => ({
-    x: direction > 0 ? 80 : -80,
-    opacity: 0,
-    scale: 0.98,
-  }),
-  center: {
-    x: 0,
-    opacity: 1,
-    scale: 1,
-    transition: {
-      x: { type: "spring", stiffness: 320, damping: 32 },
-      opacity: { duration: 0.28 },
-      scale: { duration: 0.28 },
-    },
-  },
-  exit: (direction) => ({
-    x: direction > 0 ? -80 : 80,
-    opacity: 0,
-    scale: 0.98,
-    transition: {
-      x: { type: "spring", stiffness: 320, damping: 32 },
-      opacity: { duration: 0.22 },
-      scale: { duration: 0.22 },
-    },
-  }),
-};
 
 export default function Projects({
   activeProject: externalActiveProject,
@@ -42,15 +14,26 @@ export default function Projects({
   const [filter, setFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [direction, setDirection] = useState(1);
+  const [_direction, setDirection] = useState(1);
   const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [userInteracted, setUserInteracted] = useState(false);
   const [internalActiveProject, setInternalActiveProject] = useState(null);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+    return false;
+  });
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [viewportWidth, setViewportWidth] = useState(
+    typeof window !== "undefined" ? window.innerWidth : 1200
+  );
 
-  // Touch Swipe tracking
+  // Touch swipe tracking
   const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const touchStartY = useRef(0);
+  const touchDeltaX = useRef(0);
   const showcaseRef = useRef(null);
 
   const activeProject = externalActiveProject !== undefined ? externalActiveProject : internalActiveProject;
@@ -69,29 +52,47 @@ export default function Projects({
       const matchDesc = p.description.toLowerCase().includes(q);
       const matchTech = p.technologies.some((t) => t.toLowerCase().includes(q));
       const matchCat = p.category.toLowerCase().includes(q);
-      const matchFeatures = p.features.some((f) => f.toLowerCase().includes(q));
+      const matchFeatures = p.features ? p.features.some((f) => f.toLowerCase().includes(q)) : false;
       const matchStatus = p.status ? p.status.toLowerCase().includes(q) : false;
 
       return matchTitle || matchDesc || matchTech || matchCat || matchFeatures || matchStatus;
     });
   }, [filter, searchQuery]);
 
-  // Reset index when filter or search changes
+  // Reset index safely when filter or search changes
   useEffect(() => {
     setCurrentIndex(0);
     setDirection(1);
   }, [filter, searchQuery]);
 
+  // Safe current index clamped to filtered length
+  const safeIndex = Math.min(currentIndex, Math.max(0, filteredProjects.length - 1));
+
+  // Viewport resize tracking
+  useEffect(() => {
+    const handleResize = () => setViewportWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Tab visibility detection
+  useEffect(() => {
+    const handleVisibility = () => {
+      setIsTabVisible(document.visibilityState === "visible");
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
   // Reduced motion detection
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(mq.matches);
     const handler = (e) => setPrefersReducedMotion(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Handlers for next / prev navigation
+  // Navigation handlers
   const handlePrev = useCallback(() => {
     setDirection(-1);
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : filteredProjects.length - 1));
@@ -104,19 +105,20 @@ export default function Projects({
 
   const handleJump = useCallback(
     (index) => {
-      setDirection(index > currentIndex ? 1 : -1);
+      setDirection(index > safeIndex ? 1 : -1);
       setCurrentIndex(index);
     },
-    [currentIndex]
+    [safeIndex]
   );
 
-  // AUTOMATIC HORIZONTAL PROJECT MOVEMENT (5.5s interval)
-  // Pauses on hover, touch, modal open, or reduced motion preference
+  // Automatic horizontal movement (4.5s interval)
   const isAutoPlayActive =
     !isHovered &&
+    !isFocused &&
     !userInteracted &&
     !prefersReducedMotion &&
     !activeProject &&
+    isTabVisible &&
     filteredProjects.length > 1;
 
   useEffect(() => {
@@ -125,19 +127,21 @@ export default function Projects({
     const timer = setInterval(() => {
       setDirection(1);
       setCurrentIndex((prev) => (prev < filteredProjects.length - 1 ? prev + 1 : 0));
-    }, 5500);
+    }, 4500);
 
     return () => clearInterval(timer);
   }, [isAutoPlayActive, filteredProjects.length]);
 
-  // Resume auto play after temporary manual interaction
+  // Temporary pause reset after manual user interaction
   useEffect(() => {
     if (!userInteracted) return;
-    const timeout = setTimeout(() => setUserInteracted(false), 9000);
+    const timeout = setTimeout(() => setUserInteracted(false), 7000);
     return () => clearTimeout(timeout);
-  }, [userInteracted, currentIndex]);
+  }, [userInteracted, safeIndex]);
 
-  // Keyboard navigation (ArrowLeft / ArrowRight)
+  const currentProject = filteredProjects[safeIndex] || filteredProjects[0];
+
+  // Keyboard navigation: Left/Right Arrow, Enter/Space
   useEffect(() => {
     const handleKeyDown = (e) => {
       const activeEl = document.activeElement;
@@ -158,46 +162,169 @@ export default function Projects({
         e.preventDefault();
         setUserInteracted(true);
         handleNext();
+      } else if (e.key === "Enter" || e.key === " ") {
+        if (activeEl && (activeEl.tagName === "BUTTON" || activeEl.tagName === "A")) {
+          return;
+        }
+        if (currentProject) {
+          e.preventDefault();
+          handleOpen(currentProject);
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handlePrev, handleNext, activeProject]);
+  }, [handlePrev, handleNext, activeProject, currentProject, handleOpen]);
 
   // Touch Swipe Handlers for Mobile
   const handleTouchStart = (e) => {
     touchStartX.current = e.touches[0].clientX;
-    touchEndX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    touchDeltaX.current = 0;
     setIsHovered(true);
   };
 
   const handleTouchMove = (e) => {
-    touchEndX.current = e.touches[0].clientX;
+    touchDeltaX.current = e.touches[0].clientX - touchStartX.current;
   };
 
   const handleTouchEnd = () => {
     setIsHovered(false);
-    const deltaX = touchEndX.current - touchStartX.current;
-    if (deltaX > 45) {
+    const deltaX = touchDeltaX.current;
+    if (Math.abs(deltaX) > 40) {
       setUserInteracted(true);
-      handlePrev();
-    } else if (deltaX < -45) {
-      setUserInteracted(true);
-      handleNext();
+      if (deltaX < 0) {
+        handleNext();
+      } else {
+        handlePrev();
+      }
     }
   };
 
-  const currentProject = filteredProjects[currentIndex] || filteredProjects[0];
-  const prevProject =
-    filteredProjects[currentIndex - 1] ||
-    (currentIndex === 0 ? filteredProjects[filteredProjects.length - 1] : null);
-  const nextProject =
-    filteredProjects[currentIndex + 1] ||
-    (currentIndex === filteredProjects.length - 1 ? filteredProjects[0] : null);
+  // Circular relative offset calculation
+  const getRelativeOffset = useCallback(
+    (index) => {
+      const total = filteredProjects.length;
+      if (total <= 1) return 0;
+      let diff = index - safeIndex;
+      while (diff > total / 2) diff -= total;
+      while (diff < -total / 2) diff += total;
+      return diff;
+    },
+    [filteredProjects.length, safeIndex]
+  );
+
+  // Responsive values for compact cinematic layout
+  const { xOffset, rotateY, rotateZ, sideScale, sideOpacity } = useMemo(() => {
+    if (viewportWidth >= 1200) {
+      return { xOffset: 330, rotateY: 10, rotateZ: 5, sideScale: 0.84, sideOpacity: 0.40 };
+    }
+    if (viewportWidth >= 768) {
+      return { xOffset: 250, rotateY: 8, rotateZ: 4, sideScale: 0.84, sideOpacity: 0.40 };
+    }
+    if (viewportWidth >= 480) {
+      return { xOffset: 130, rotateY: 6, rotateZ: 3, sideScale: 0.86, sideOpacity: 0.30 };
+    }
+    return { xOffset: 95, rotateY: 5, rotateZ: 2, sideScale: 0.88, sideOpacity: 0.25 };
+  }, [viewportWidth]);
+
+  // Spring transition config
+  const springTransition = prefersReducedMotion
+    ? { duration: 0.25, ease: "easeOut" }
+    : {
+        type: "spring",
+        stiffness: 280,
+        damping: 28,
+        mass: 0.88,
+      };
+
+  // Card motion styles based on relative offset
+  const getCardStyle = useCallback(
+    (offset) => {
+      if (prefersReducedMotion) {
+        if (offset === 0) {
+          return { x: 0, scale: 1, opacity: 1, rotateY: 0, rotateZ: 0, zIndex: 10, filter: "blur(0px)" };
+        }
+        if (offset === -1) {
+          return { x: -30, scale: 0.95, opacity: 0.2, rotateY: 0, rotateZ: 0, zIndex: 5, filter: "blur(0px)" };
+        }
+        if (offset === 1) {
+          return { x: 30, scale: 0.95, opacity: 0.2, rotateY: 0, rotateZ: 0, zIndex: 5, filter: "blur(0px)" };
+        }
+        return { x: 0, scale: 0.9, opacity: 0, rotateY: 0, rotateZ: 0, zIndex: 1, filter: "blur(0px)" };
+      }
+
+      if (offset === 0) {
+        return {
+          x: 0,
+          scale: 1,
+          opacity: 1,
+          rotateY: 0,
+          rotateZ: 0,
+          zIndex: 10,
+          filter: "blur(0px)",
+        };
+      } else if (offset === -1) {
+        return {
+          x: -xOffset,
+          scale: sideScale,
+          opacity: sideOpacity,
+          rotateY: rotateY,
+          rotateZ: -rotateZ,
+          zIndex: 5,
+          filter: "blur(1.2px)",
+        };
+      } else if (offset === 1) {
+        return {
+          x: xOffset,
+          scale: sideScale,
+          opacity: sideOpacity,
+          rotateY: -rotateY,
+          rotateZ: rotateZ,
+          zIndex: 5,
+          filter: "blur(1.2px)",
+        };
+      } else if (offset < -1) {
+        return {
+          x: -xOffset * 1.55,
+          scale: sideScale * 0.85,
+          opacity: 0,
+          rotateY: rotateY * 1.2,
+          rotateZ: -rotateZ * 1.3,
+          zIndex: 1,
+          filter: "blur(3px)",
+        };
+      } else {
+        return {
+          x: xOffset * 1.55,
+          scale: sideScale * 0.85,
+          opacity: 0,
+          rotateY: -rotateY * 1.2,
+          rotateZ: rotateZ * 1.3,
+          zIndex: 1,
+          filter: "blur(3px)",
+        };
+      }
+    },
+    [prefersReducedMotion, xOffset, rotateY, rotateZ, sideScale, sideOpacity]
+  );
+
+  // Result count label
+  const resultCountLabel = useMemo(() => {
+    const isFiltered = filter !== "ALL" || searchQuery.trim().length > 0;
+    const count = filteredProjects.length;
+    if (isFiltered) {
+      return `${count} ${count === 1 ? "project found" : "projects found"}`;
+    }
+    return `${count} projects`;
+  }, [filter, searchQuery, filteredProjects.length]);
 
   return (
-    <section id="projects" className="relative py-20 sm:py-28 md:py-32 overflow-hidden">
+    <section
+      id="projects"
+      className="relative py-16 sm:py-20 md:py-24 pb-24 md:pb-28 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8">
@@ -212,13 +339,12 @@ export default function Projects({
             <span className="font-bold text-orange text-base sm:text-lg">
               {filteredProjects.length}
             </span>
-            <span>{filteredProjects.length === 1 ? "PROJECT" : "PROJECTS"}</span>
+            <span className="uppercase">{resultCountLabel}</span>
           </div>
         </div>
 
-        {/* Search Bar & Category Filters */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10 md:mb-12">
-          {/* Category Filter Pills */}
+        {/* Search Bar & Category Filter Pills */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 md:mb-10">
           <div className="flex flex-wrap gap-2">
             {filterCategories.map((cat) => (
               <button
@@ -240,7 +366,6 @@ export default function Projects({
             ))}
           </div>
 
-          {/* Real-time Search Box */}
           <div className="relative w-full md:w-72 shrink-0">
             <div className="relative flex items-center">
               <Search
@@ -270,207 +395,214 @@ export default function Projects({
           </div>
         </div>
 
-        {/* SHOWCASE CAROUSEL CONTAINER */}
+        {/* COMPACT CINEMATIC CAROUSEL CONTAINER */}
         {filteredProjects.length > 0 ? (
           <div
             ref={showcaseRef}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
+            onFocusCapture={() => setIsFocused(true)}
+            onBlurCapture={() => setIsFocused(false)}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
-            className="relative"
+            className="relative py-4"
           >
-            {/* DESKTOP VIEWPORT WITH PEEK CARDS */}
-            <div className="hidden md:block relative my-4">
-              <div className="relative min-h-[500px] lg:min-h-[530px] flex items-center justify-center overflow-visible px-4">
-                {/* Peek Previous Card */}
-                {prevProject && filteredProjects.length > 1 && (
-                  <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-[65%] lg:w-[70%] pointer-events-auto transform -translate-x-1/4 opacity-35 hover:opacity-75 transition-opacity z-10"
-                    onClick={() => {
-                      setUserInteracted(true);
-                      handlePrev();
-                    }}
-                  >
-                    <ProjectCard
-                      project={prevProject}
-                      index={projects.findIndex((p) => p.id === prevProject.id)}
-                      _total={filteredProjects.length}
-                      onOpen={handleOpen}
-                      onOpenLightbox={onOpenLightbox}
-                      isActive={false}
-                      isPrev={true}
-                      onClickPeek={() => {
-                        setUserInteracted(true);
-                        handlePrev();
-                      }}
-                    />
-                  </div>
-                )}
+            {/* Soft Ambient Spotlight Behind Active Card */}
+            <div
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[420px] h-[420px] rounded-full bg-[radial-gradient(circle,rgba(255,122,51,0.08)_0%,transparent_70%)] pointer-events-none blur-2xl"
+              aria-hidden="true"
+            />
 
-                {/* Current Active Featured Project */}
-                {currentProject && (
-                  <div className="relative z-30 w-full max-w-4xl">
-                    <AnimatePresence mode="wait" custom={direction}>
-                      <motion.div
-                        key={currentProject.id}
-                        custom={direction}
-                        variants={slideVariants}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                      >
-                        <ProjectCard
-                          project={currentProject}
-                          index={projects.findIndex((p) => p.id === currentProject.id)}
-                          _total={filteredProjects.length}
-                          onOpen={handleOpen}
-                          onOpenLightbox={onOpenLightbox}
-                          isActive={true}
-                        />
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-                )}
+            {/* Elegant Side Navigation Arrows (Positioned comfortably away from cards) */}
+            {filteredProjects.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserInteracted(true);
+                    handlePrev();
+                  }}
+                  data-cursor-hover
+                  aria-label="Previous project"
+                  className="absolute left-2 sm:left-6 md:left-10 lg:left-14 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border-soft bg-surface/90 backdrop-blur-md text-ink-soft hover:text-orange hover:border-orange/50 transition-all shadow-md focus-visible:ring-2 focus-visible:ring-orange"
+                >
+                  <ChevronLeft size={20} />
+                </button>
 
-                {/* Peek Next Card */}
-                {nextProject && filteredProjects.length > 1 && (
-                  <div
-                    className="absolute right-0 top-1/2 -translate-y-1/2 w-[65%] lg:w-[70%] pointer-events-auto transform translate-x-1/4 opacity-35 hover:opacity-75 transition-opacity z-10"
-                    onClick={() => {
-                      setUserInteracted(true);
-                      handleNext();
-                    }}
-                  >
-                    <ProjectCard
-                      project={nextProject}
-                      index={projects.findIndex((p) => p.id === nextProject.id)}
-                      _total={filteredProjects.length}
-                      onOpen={handleOpen}
-                      onOpenLightbox={onOpenLightbox}
-                      isActive={false}
-                      isNext={true}
-                      onClickPeek={() => {
-                        setUserInteracted(true);
-                        handleNext();
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUserInteracted(true);
+                    handleNext();
+                  }}
+                  data-cursor-hover
+                  aria-label="Next project"
+                  className="absolute right-2 sm:right-6 md:right-10 lg:right-14 top-1/2 -translate-y-1/2 z-40 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border-soft bg-surface/90 backdrop-blur-md text-ink-soft hover:text-orange hover:border-orange/50 transition-all shadow-md focus-visible:ring-2 focus-visible:ring-orange"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </>
+            )}
+
+            {/* Viewport with 3D Perspective */}
+            <div
+              className="relative w-full my-2 select-none overflow-hidden md:overflow-visible"
+              style={{
+                perspective: "1200px",
+                transformStyle: "preserve-3d",
+              }}
+            >
+              {/* Invisible Layout Spacer establishing compact container height */}
+              {currentProject && (
+                <div
+                  className="invisible pointer-events-none w-full max-w-[340px] sm:max-w-[350px] md:max-w-[360px] mx-auto px-2"
+                  aria-hidden="true"
+                >
+                  <ProjectCard
+                    project={currentProject}
+                    index={projects.findIndex((p) => p.id === currentProject.id)}
+                    _total={filteredProjects.length}
+                    onOpen={() => {}}
+                    isActive={true}
+                    isSpacer={true}
+                  />
+                </div>
+              )}
+
+              {/* 3D Layered Carousel Deck */}
+              <div
+                className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                style={{ transformStyle: "preserve-3d" }}
+              >
+                {filteredProjects.map((project, idx) => {
+                  const offset = getRelativeOffset(idx);
+                  const isVisible = Math.abs(offset) <= 2;
+                  const isCurrent = offset === 0;
+                  const isPrev = offset === -1;
+                  const isNext = offset === 1;
+
+                  return (
+                    <motion.div
+                      key={project.id}
+                      initial={false}
+                      animate={getCardStyle(offset)}
+                      transition={springTransition}
+                      drag={isCurrent && filteredProjects.length > 1 && !prefersReducedMotion ? "x" : false}
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0.25}
+                      onDragEnd={(_e, info) => {
+                        const swipeThreshold = 40;
+                        const velocityThreshold = 250;
+                        if (info.offset.x < -swipeThreshold || info.velocity.x < -velocityThreshold) {
+                          setUserInteracted(true);
+                          handleNext();
+                        } else if (info.offset.x > swipeThreshold || info.velocity.x > velocityThreshold) {
+                          setUserInteracted(true);
+                          handlePrev();
+                        }
                       }}
-                    />
-                  </div>
-                )}
+                      style={{
+                        transformStyle: "preserve-3d",
+                        display: Math.abs(offset) > 2 ? "none" : "block",
+                      }}
+                      className={`absolute top-0 left-0 right-0 mx-auto w-full max-w-[340px] sm:max-w-[350px] md:max-w-[360px] px-2 ${
+                        isCurrent
+                          ? "pointer-events-auto cursor-pointer"
+                          : isVisible
+                          ? "pointer-events-auto cursor-pointer"
+                          : "pointer-events-none"
+                      }`}
+                      onClick={() => {
+                        if (isPrev) {
+                          setUserInteracted(true);
+                          handlePrev();
+                        } else if (isNext) {
+                          setUserInteracted(true);
+                          handleNext();
+                        }
+                      }}
+                    >
+                      <ProjectCard
+                        project={project}
+                        index={projects.findIndex((p) => p.id === project.id)}
+                        _total={filteredProjects.length}
+                        onOpen={handleOpen}
+                        onOpenLightbox={onOpenLightbox}
+                        isActive={isCurrent}
+                        isPrev={isPrev}
+                        isNext={isNext}
+                        onClickPeek={() => {
+                          setUserInteracted(true);
+                          if (isPrev) handlePrev();
+                          if (isNext) handleNext();
+                        }}
+                      />
+                    </motion.div>
+                  );
+                })}
               </div>
             </div>
 
-            {/* MOBILE VIEWPORT WITH TOUCH HORIZONTAL SLIDER */}
-            <div className="md:hidden relative my-2">
-              {currentProject && (
-                <AnimatePresence mode="wait" custom={direction}>
-                  <motion.div
-                    key={currentProject.id}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                  >
-                    <ProjectCard
-                      project={currentProject}
-                      index={projects.findIndex((p) => p.id === currentProject.id)}
-                      _total={filteredProjects.length}
-                      onOpen={handleOpen}
-                      onOpenLightbox={onOpenLightbox}
-                      isMobile={true}
-                    />
-                  </motion.div>
-                </AnimatePresence>
-              )}
-            </div>
-
-            {/* NAVIGATION CONTROLS & PROGRESS INDICATORS ROW */}
+            {/* PAGINATION & STATUS INDICATORS ROW */}
             {filteredProjects.length > 1 && (
-              <div className="mt-8 flex items-center justify-between max-w-4xl mx-auto px-2">
-                {/* Prev / Next Buttons */}
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserInteracted(true);
-                      handlePrev();
-                    }}
-                    data-cursor-hover
-                    aria-label="Previous project"
-                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border-soft bg-surface text-ink-soft hover:text-orange hover:border-orange/50 transition-all shadow-sm"
-                  >
-                    <ChevronLeft size={20} />
-                  </button>
+              <div className="mt-6 flex flex-col items-center gap-3">
+                {/* Small Elegant Dots */}
+                <div className="flex items-center gap-2">
+                  {filteredProjects.map((p, idx) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => {
+                        setUserInteracted(true);
+                        handleJump(idx);
+                      }}
+                      data-cursor-hover
+                      aria-label={`Go to project ${idx + 1}`}
+                      className={`h-2 rounded-full transition-all duration-300 focus-visible:ring-2 focus-visible:ring-orange ${
+                        safeIndex === idx
+                          ? "w-6 bg-orange shadow-[0_0_8px_rgba(255,122,51,0.5)]"
+                          : "w-2 bg-border-soft hover:bg-ink-muted"
+                      }`}
+                    />
+                  ))}
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setUserInteracted(true);
-                      handleNext();
-                    }}
-                    data-cursor-hover
-                    aria-label="Next project"
-                    className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-border-soft bg-surface text-ink-soft hover:text-orange hover:border-orange/50 transition-all shadow-sm"
-                  >
-                    <ChevronRight size={20} />
-                  </button>
-
-                  {/* Auto-movement status badge */}
+                {/* Numeric Counter & Autoplay Badge */}
+                <div className="flex items-center gap-3 font-mono text-xs text-ink-muted select-none">
+                  <span className="font-semibold tracking-wider">
+                    <span className="text-orange">{String(safeIndex + 1).padStart(2, "0")}</span>
+                    {" / "}
+                    <span>{String(filteredProjects.length).padStart(2, "0")}</span>
+                  </span>
                   <span
-                    className={`hidden sm:inline-flex items-center gap-1.5 font-mono text-[11px] px-2.5 py-1 rounded-full border ${
+                    className={`hidden sm:inline-flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded-full border ${
                       isAutoPlayActive
-                        ? "bg-orange-soft/60 border-orange/20 text-orange"
+                        ? "bg-orange-soft border-orange/30 text-orange"
                         : "bg-surface-2 border-border-soft text-ink-muted"
                     }`}
                   >
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${
+                      className={`w-1 h-1 rounded-full ${
                         isAutoPlayActive ? "bg-orange animate-pulse" : "bg-ink-muted"
                       }`}
                     />
                     <span>{isAutoPlayActive ? "Auto Slide" : "Paused"}</span>
                   </span>
                 </div>
-
-                {/* Progress Indicators: Dot Pills & Numeric Counter */}
-                <div className="flex items-center gap-4 sm:gap-6">
-                  <div className="flex items-center gap-1.5">
-                    {filteredProjects.map((p, idx) => (
-                      <button
-                        key={p.id}
-                        type="button"
-                        onClick={() => {
-                          setUserInteracted(true);
-                          handleJump(idx);
-                        }}
-                        data-cursor-hover
-                        aria-label={`Go to project ${idx + 1}`}
-                        className={`h-2.5 rounded-full transition-all duration-300 ${
-                          currentIndex === idx
-                            ? "w-7 sm:w-8 bg-orange shadow-[0_0_10px_rgba(255,122,51,0.5)]"
-                            : "w-2 sm:w-2.5 bg-border-soft hover:bg-ink-muted"
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-ink-muted">
-                    <span className="text-orange">{String(currentIndex + 1).padStart(2, "0")}</span>
-                    {" / "}
-                    <span>{String(filteredProjects.length).padStart(2, "0")}</span>
-                  </span>
-                </div>
               </div>
             )}
           </div>
         ) : (
-          <div className="text-center py-16 px-4 rounded-3xl border border-border-soft bg-surface">
-            <p className="font-display font-medium text-lg text-ink mb-2">
-              No projects found matching "{searchQuery}"
+          /* Empty State */
+          <div className="text-center py-16 px-4 rounded-3xl border border-border-soft bg-surface my-6">
+            <div className="w-12 h-12 rounded-full bg-orange-soft border border-orange/30 text-orange flex items-center justify-center mx-auto mb-4">
+              <Search size={20} />
+            </div>
+            <p className="font-display font-medium text-lg text-ink mb-1.5">
+              No projects found matching &ldquo;{searchQuery}&rdquo;
             </p>
-            <p className="text-xs text-ink-soft mb-6">
+            <p className="text-xs text-ink-soft mb-6 max-w-md mx-auto leading-relaxed">
               Try searching for technologies like React, Python, Node.js, Android, or clear your query.
             </p>
             <button
@@ -479,9 +611,9 @@ export default function Projects({
                 setSearchQuery("");
                 setFilter("ALL");
               }}
-              className="inline-flex items-center gap-2 text-xs font-mono text-orange border border-orange/40 bg-orange-soft px-4 py-2 rounded-full hover:bg-orange/20 transition-colors"
+              className="inline-flex items-center gap-2 text-xs font-mono font-semibold text-orange border border-orange/40 bg-orange-soft px-5 py-2.5 rounded-full hover:bg-orange/20 transition-colors"
             >
-              Clear Search & Filters
+              Clear Search &amp; Filters
             </button>
           </div>
         )}
