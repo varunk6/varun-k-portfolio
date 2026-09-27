@@ -8,7 +8,6 @@ import MobileHeader from "./components/MobileHeader";
 import BottomNav from "./components/BottomNav";
 import Hero from "./components/Hero";
 import About from "./components/About";
-import WhatIBuild from "./components/WhatIBuild";
 import TechMarquee from "./components/TechMarquee";
 import Projects from "./components/Projects";
 import ProjectModal from "./components/ProjectModal";
@@ -89,7 +88,6 @@ export default function App() {
       <main>
         <Hero onOpenPdf={setPdfModalData} />
         <About />
-        <WhatIBuild />
         <TechMarquee />
         <Projects
           activeProject={activeProject}

@@ -26,7 +26,6 @@ export const WHATSAPP_NUMBER = "YOUR_NUMBER_HERE";
 export const footerNavLinks = [
   { label: "Home", href: "#home" },
   { label: "About", href: "#about" },
-  { label: "What I Build", href: "#what-i-build" },
   { label: "Projects", href: "#projects" },
   { label: "Skills", href: "#skills" },
   { label: "Journey", href: "#journey" },

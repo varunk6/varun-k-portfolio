@@ -173,25 +173,31 @@ export default function Hero({ onOpenPdf }) {
           </motion.div>
         </motion.div>
 
-        {/* Portrait */}
+        {/* Portrait - Exact Template Organic Pebble Shape */}
         <motion.div
           initial={{ opacity: 0, scale: 0.92, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           className="relative mx-auto md:mx-0 w-full max-w-[280px] sm:max-w-[340px] md:max-w-none mt-4 md:mt-0"
         >
+          {/* Subtle Orange Glow matching template shape */}
           <div
             aria-hidden="true"
             className="absolute inset-0 -z-10 bg-orange/25 blur-[80px] rounded-[40%_60%_60%_40%/50%_40%_60%_50%]"
           />
-          <div className="relative aspect-[4/5] rounded-[40%_60%_60%_40%/50%_40%_60%_50%] overflow-hidden border border-border bg-surface shadow-2xl">
+
+          {/* Exact Template Organic Pebble Shape Container */}
+          <div className="relative aspect-[4/5] rounded-[40%_60%_60%_40%/50%_40%_60%_50%] overflow-hidden border border-border bg-surface shadow-2xl group transition-all duration-500 hover:border-orange/50 hover:shadow-[0_0_40px_rgba(255,122,51,0.25)]">
             {!imgError ? (
-              <img
-                src="/profile.jpg"
-                alt="Varun K — Full Stack Developer"
-                onError={() => setImgError(true)}
-                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-              />
+              <picture>
+                <source srcSet="/profile/varun-profile.webp" type="image/webp" />
+                <img
+                  src="/profile/varun-profile.jpg"
+                  alt="Varun K — Full Stack Developer"
+                  onError={() => setImgError(true)}
+                  className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+              </picture>
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-b from-surface-2 to-surface text-ink-muted">
                 <span className="font-display text-6xl font-bold text-orange/70">
